@@ -32,6 +32,7 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
+	console.log("Working on post request password:  " + req.body.password);
 	User.create({
 		username: req.body.username,
 		email: req.body.email,
@@ -46,7 +47,7 @@ router.post("/", (req, res) => {
 });
 
 router.put("/:id", (req, res) => {
-	User.update(req.body, { where: { id: req.params.id } })
+	User.update(req.body, { individualHooks: true, where: { id: req.params.id } })
 		.then((dbUserData) => {
 			if (!dbUserData[0]) {
 				res.status(400).json({ message: "No user found with this id" });
