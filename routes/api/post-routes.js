@@ -1,0 +1,101 @@
+const { User, Post } = require("../../models");
+const router = require("express").Router();
+
+router.get("/", (req, res) => {
+	console.log("======================");
+	Post.findAll({
+		attributes: ["id", "title", "post_url", "created_at"],
+		order:[["created_at","DESC"]],
+		include: {
+			model: User,
+			attributes: ["username"],
+		},
+	})
+		.then((data) => {
+			res.json(data);
+		})
+		.catch((err) => {
+			res.status(500).json(err);
+		});
+});
+
+router.get("/:id", (req, res) => {
+	Post.findOne({
+		where: {
+			id: req.params.id,
+		},
+		attributes: ["id", "title", "post_url", "created_at"],
+		include: {
+			model: User,
+			attributes: ["username"],
+		},
+	})
+		.then((data) => {
+			if (!data) {
+				res.status(404).json({ message: "id not found" });
+				return;
+			}
+			res.json(data);
+		})
+		.catch((err) => {
+			res.status(500).json(err);
+		});
+});
+
+router.post("/", (req, res) => {
+	Post.create({
+		title: req.body.title,
+		post_url: req.body.post_url,
+		user_id: req.body.user_id,
+	})
+		.then((data) => {
+			res.json(data);
+		})
+		.catch((err) => {
+			res.status(500).json(err);
+		});
+});
+
+//Update posts
+router.put("/:id", (req, res) => {
+	Post.update(
+		{
+			title: req.body.title,
+		},
+		{
+			where: {
+				id: req.params.id,
+			},
+		}
+	)
+		.then((updateData) => {
+			if (!updateData) {
+				res.status(404).json({ message: "No post found for this id" });
+				return;
+			}
+			res.json(updateData);
+		})
+		.catch((err) => {
+			res.status(500).json(err);
+		});
+});
+
+router.delete("/:id", (req, res) => {
+	Post.destroy({
+		where: {
+			id: req.params.id,
+		},
+	})
+		.then((data) => {
+			if (!data) {
+				res.status(404).json({ message: "id not found" });
+				return;
+			}
+			res.json(data);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json(err);
+		});
+});
+module.exports = router;
